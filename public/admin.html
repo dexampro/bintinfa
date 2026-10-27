@@ -30,8 +30,8 @@ table{width:100%;border-collapse:collapse;min-width:760px}th,td{text-align:left;
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 // Public/anon values are identifiers, not secrets. Replace these placeholders before deploying.
-const SUPABASE_URL='REPLACE_WITH_SUPABASE_URL';
-const SUPABASE_ANON_KEY='REPLACE_WITH_SUPABASE_ANON_KEY';
+const SUPABASE_URL='https://gluievapemlmqjrsnkji.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_W4I-9Ff2YEA72doIY6tZ5Q_-RQs58Ds';
 const configured=!SUPABASE_URL.includes('REPLACE_')&&!SUPABASE_ANON_KEY.includes('REPLACE_');
 const sb=configured?createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
 const $=id=>document.getElementById(id);let token=null;let registrations=[];
