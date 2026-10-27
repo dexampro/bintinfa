@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BINTIN FA | Admin</title><link rel="icon" href="/bintin-fa-logo.jpg">
+<style>
+:root{--green:#063820;--gold:#d18416;--bg:#f3f6f4;--ink:#17251d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:15px Arial,sans-serif;color:var(--ink)}
+header{background:var(--green);color:white;padding:18px 22px;display:flex;gap:12px;align-items:center}
+header img{width:50px;height:50px;object-fit:contain;background:white;border-radius:8px}header h1{font-size:1.2rem;margin:0}header p{margin:4px 0 0;color:#ead5ac}
+main{max-width:1200px;margin:24px auto;padding:0 14px}.card{background:white;border:1px solid #dce5dd;border-radius:12px;padding:18px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}label{display:block;font-size:.86rem;font-weight:bold;margin-bottom:5px}
+input,select{width:100%;padding:10px;border:1px solid #bac7bd;border-radius:7px;font:inherit}
+button{padding:10px 14px;border:0;border-radius:7px;background:var(--gold);font-weight:bold;cursor:pointer}button.secondary{background:#e7eee8}button:disabled{opacity:.5}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.status{margin:10px 0;color:#48594d}
+table{width:100%;border-collapse:collapse;min-width:760px}th,td{text-align:left;padding:10px;border-bottom:1px solid #e2e8e3;font-size:.88rem}th{background:#edf2ee}
+.table-wrap{overflow:auto}.hidden{display:none}.muted{color:#5d6c61;font-size:.88rem}
+@media(max-width:700px){.grid{grid-template-columns:1fr}header{padding:14px}}
+</style></head><body>
+<header><img src="/bintin-fa-logo.jpg" alt=""><div><h1>BINTIN FA — Admin Dashboard</h1><p>Private player registration management</p></div></header>
+<main>
+<section class="card" id="login-card"><h2>Administrator sign in</h2><p class="muted">Use the administrator account created in Supabase Authentication. Access is restricted to approved admin emails.</p>
+<form id="login"><div class="grid"><div><label for="email">Admin email</label><input id="email" type="email" required autocomplete="username"></div><div><label for="password">Password</label><input id="password" type="password" required autocomplete="current-password"></div></div><div class="actions"><button>Sign in</button></div><p id="login-status" class="status" role="status"></p></form></section>
+<section class="card hidden" id="dashboard"><div class="actions" style="justify-content:space-between;margin-top:0"><div><h2 style="margin:0">Player registrations</h2><p class="muted">Medical information is not shown in this list. Open/download a PDF only when needed.</p></div><button class="secondary" id="logout">Sign out</button></div>
+<div class="actions"><input id="search" placeholder="Search by player name" style="max-width:340px"><button id="refresh" class="secondary">Refresh</button></div><p id="dash-status" class="status" role="status"></p>
+<div class="table-wrap"><table><thead><tr><th>Registration</th><th>Player</th><th>Age</th><th>Phone</th><th>Position</th><th>Team category</th><th>Actions</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+<section class="card hidden" id="edit-card"><h2>Official-use fields</h2><p id="edit-player" class="muted"></p><form id="edit"><input type="hidden" id="edit-id"><div class="grid">
+<div><label for="team">Team Category</label><select id="team"><option value="">Not assigned</option><option>Under 10</option><option>Under 12</option><option>Under 14</option><option>Under 16</option><option>Under 18</option><option>Senior Team</option></select></div>
+<div><label for="fee">Registration Fee</label><input id="fee" maxlength="100"></div><div><label for="coach">Coach's Name</label><input id="coach" maxlength="150"></div>
+</div><div class="actions"><button>Save official-use fields</button><button type="button" id="cancel-edit" class="secondary">Cancel</button></div><p id="edit-status" class="status" role="status"></p></form></section>
+</main>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+// Public/anon values are identifiers, not secrets. Replace these placeholders before deploying.
+const SUPABASE_URL='REPLACE_WITH_SUPABASE_URL';
+const SUPABASE_ANON_KEY='REPLACE_WITH_SUPABASE_ANON_KEY';
+const configured=!SUPABASE_URL.includes('REPLACE_')&&!SUPABASE_ANON_KEY.includes('REPLACE_');
+const sb=configured?createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
+const $=id=>document.getElementById(id);let token=null;let registrations=[];
+function showLogin(){ $('login-card').classList.remove('hidden');$('dashboard').classList.add('hidden');$('edit-card').classList.add('hidden');}
+function showDash(){ $('login-card').classList.add('hidden');$('dashboard').classList.remove('hidden');}
+function setStatus(id,msg){$(id).textContent=msg;}
+async function api(url,options={}){
+ const res=await fetch(url,{...options,headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,...options.headers}});
+ const data=await res.json();if(!res.ok)throw new Error(data.error||'Request failed');return data;
+}
+$('login').addEventListener('submit',async e=>{
+ e.preventDefault();setStatus('login-status','Signing in…');
+ if(!configured){setStatus('login-status','Admin setup needed: add your Supabase URL and anon key to admin.html as described in README.md.');return;}
+ try{const {data,error}=await sb.auth.signInWithPassword({email:$('email').value,password:$('password').value});if(error)throw error;token=data.session.access_token;
+  // The server verifies both this token and the admin email allowlist.
+  await api('/.netlify/functions/admin-registrations');showDash();await loadRows();
+ }catch(err){setStatus('login-status',err.message||'Sign in failed.');}
+});
+async function loadRows(){
+ try{setStatus('dash-status','Loading registrations…');const data=await api('/.netlify/functions/admin-registrations?q='+encodeURIComponent($('search').value.trim()));registrations=data.registrations||[];renderRows();setStatus('dash-status',`${registrations.length} registration(s) loaded.`);}
+ catch(err){setStatus('dash-status',err.message);if(/sign in|authorised/i.test(err.message))showLogin();}
+}
+function renderRows(){
+ const tbody=$('rows');tbody.replaceChildren();
+ for(const r of registrations){
+  const tr=document.createElement('tr');
+  const vals=[r.registration_number,r.full_name, String(r.age),r.phone_number,r.preferred_position,r.team_category||'Unassigned'];
+  vals.forEach(v=>{const td=document.createElement('td');td.textContent=v||'—';tr.appendChild(td);});
+  const td=document.createElement('td');const edit=document.createElement('button');edit.textContent='Official fields';edit.className='secondary';edit.onclick=()=>editRow(r);
+  const pdf=document.createElement('button');pdf.textContent='Download PDF';pdf.style.marginLeft='6px';pdf.onclick=()=>downloadPdf(r.id);
+  td.append(edit,pdf);tr.appendChild(td);tbody.appendChild(tr);
+ }
+}
+function editRow(r){$('edit-id').value=r.id;$('edit-player').textContent=r.registration_number+' — '+r.full_name;$('team').value=r.team_category||'';$('fee').value=r.registration_fee||'';$('coach').value=r.coach_name||'';$('edit-card').classList.remove('hidden');$('edit-card').scrollIntoView({behavior:'smooth'});}
+async function downloadPdf(id){try{setStatus('dash-status','Preparing secure PDF link…');const d=await api('/.netlify/functions/admin-registrations?action=pdf&id='+encodeURIComponent(id));window.open(d.url,'_blank','noopener');setStatus('dash-status','PDF link expires after 60 seconds.');}catch(e){setStatus('dash-status',e.message);}}
+$('edit').addEventListener('submit',async e=>{e.preventDefault();setStatus('edit-status','Saving…');try{await api('/.netlify/functions/admin-registrations',{method:'POST',body:JSON.stringify({id:$('edit-id').value,team_category:$('team').value,registration_fee:$('fee').value,coach_name:$('coach').value})});setStatus('edit-status','Saved.');$('edit-card').classList.add('hidden');await loadRows();}catch(err){setStatus('edit-status',err.message);}});
+$('cancel-edit').onclick=()=>$('edit-card').classList.add('hidden');
+$('refresh').onclick=loadRows;let timer; $('search').addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(loadRows,300);});
+$('logout').onclick=async()=>{if(sb)await sb.auth.signOut();token=null;showLogin();};
+if(!configured)setStatus('login-status','Before deploying, replace the Supabase URL and anon key placeholders in this file.'); 
+</script></body></html>
