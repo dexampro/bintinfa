@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Register a Player | BINTIN FA</title>
+<meta name="description" content="Register as a player with BINTIN FA Football Academy.">
+<link rel="icon" href="/bintin-fa-logo.jpg">
+<style>
+:root{--green:#063820;--gold:#d18416;--cream:#f5f7f4;--ink:#17251d;--muted:#5e6a62}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);font:16px/1.5 Arial,sans-serif;color:var(--ink)}
+header{background:var(--green);color:white;text-align:center;padding:26px 16px 22px;border-bottom:5px solid var(--gold)}
+.logo{width:94px;height:94px;object-fit:contain;background:white;border-radius:14px;padding:3px}
+h1{font-size:clamp(1.4rem,4vw,2rem);margin:10px 0 3px}header p{margin:3px;color:#f4dfb7}
+main{max-width:900px;margin:24px auto;padding:0 14px 28px}
+.intro,.section,.result{background:white;border:1px solid #dfe6df;border-radius:14px;padding:20px;margin-bottom:15px;box-shadow:0 5px 20px #123d2b0a}
+.intro h2{margin:0 0 5px;color:var(--green)}.section h2{font-size:1.05rem;margin:0 0 15px;padding-bottom:8px;border-bottom:2px solid #e7eee7;color:var(--green)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+label{display:block;font-weight:700;font-size:.9rem;margin-bottom:5px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid #bdc9bf;border-radius:8px;background:white;font:inherit;color:inherit}
+textarea{min-height:90px;resize:vertical}.wide{grid-column:1/-1}.hint{font-size:.83rem;color:var(--muted);margin:5px 0 0}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:400}.check input{width:auto;margin-top:5px}
+button{border:0;border-radius:9px;background:var(--gold);color:#171d17;padding:13px 18px;font-weight:800;font-size:1rem;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}.actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.status{font-size:.93rem}
+footer{text-align:center;padding:20px;background:#e8eee9;color:#435448;font-size:.85rem}
+.hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+@media(max-width:620px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.section,.intro{padding:15px}}
+</style></head>
+<body>
+<header>
+<img class="logo" src="/bintin-fa-logo.jpg" alt="BINTIN FA Football Academy logo">
+<h1>BINTIN FA</h1><p>NEW PLAYER REGISTRATION</p>
+<p>DISCIPLINE • DEVELOPMENT • TEAMWORK • EXCELLENCE</p>
+</header>
+<main>
+<div class="intro"><h2>Player Membership and Registration Record</h2><p>Please complete all required fields clearly and accurately. Parents or guardians should assist players under 18. Submitting this form sends your information securely to the academy.</p></div>
+<form id="registration">
+<section class="section"><h2>SECTION A: PERSONAL INFORMATION</h2><div class="grid">
+<div><label for="full_name">Full Name *</label><input id="full_name" name="full_name" required maxlength="150" autocomplete="name"></div>
+<div><label for="date_of_birth">Date of Birth *</label><input id="date_of_birth" name="date_of_birth" type="date" required></div>
+<div><label for="age">Age *</label><input id="age" name="age" type="number" min="1" max="120" required></div>
+<div><label for="phone_number">Phone Number *</label><input id="phone_number" name="phone_number" required maxlength="60" autocomplete="tel"></div>
+<div class="wide"><label for="home_address">Home Address *</label><textarea id="home_address" name="home_address" required maxlength="1000" autocomplete="street-address"></textarea></div>
+<div><label for="guardian_name">Parent/Guardian Name (for players under 18)</label><input id="guardian_name" name="guardian_name" maxlength="150"></div>
+<div><label for="guardian_phone">Parent/Guardian Phone Number</label><input id="guardian_phone" name="guardian_phone" maxlength="60"></div>
+<div class="wide"><label for="school_occupation">School/Occupation *</label><input id="school_occupation" name="school_occupation" required maxlength="200"></div>
+</div></section>
+<section class="section"><h2>SECTION B: FOOTBALL INFORMATION</h2><div class="grid">
+<div><label for="preferred_position">Preferred Playing Position *</label><select id="preferred_position" name="preferred_position" required><option value="">Choose position</option><option>Goalkeeper</option><option>Centre-Back</option><option>Right-Back</option><option>Left-Back</option><option>Defensive Midfielder</option><option>Central Midfielder</option><option>Attacking Midfielder</option><option>Right Winger</option><option>Left Winger</option><option>Striker</option><option>Other</option></select></div>
+<div><label for="secondary_position">Secondary Position</label><select id="secondary_position" name="secondary_position"><option value="">Choose position</option><option>None</option><option>Goalkeeper</option><option>Centre-Back</option><option>Right-Back</option><option>Left-Back</option><option>Defensive Midfielder</option><option>Central Midfielder</option><option>Attacking Midfielder</option><option>Right Winger</option><option>Left Winger</option><option>Striker</option><option>Other</option></select></div>
+<div><label for="preferred_foot">Preferred Foot *</label><select id="preferred_foot" name="preferred_foot" required><option value="">Choose foot</option><option>Right</option><option>Left</option><option>Both</option></select></div>
+<div><label for="previous_club">Previous Club/Academy (if any)</label><input id="previous_club" name="previous_club" maxlength="200"></div>
+<div class="wide"><label for="competition_experience">Previous Competition Experience</label><textarea id="competition_experience" name="competition_experience" maxlength="1500"></textarea></div>
+<div><label for="jersey_number_preference">Jersey Number Preference</label><input id="jersey_number_preference" name="jersey_number_preference" maxlength="20"></div>
+<div><label for="date_joined">Date Joined Bintin FA</label><input id="date_joined" name="date_joined" type="date"><p class="hint">Leave blank if the academy will complete this later.</p></div>
+</div></section>
+<section class="section"><h2>SECTION C: EMERGENCY AND MEDICAL INFORMATION</h2><div class="grid">
+<div><label for="emergency_contact_name">Emergency Contact Name *</label><input id="emergency_contact_name" name="emergency_contact_name" required maxlength="150"></div>
+<div><label for="emergency_relationship">Relationship to Player *</label><input id="emergency_relationship" name="emergency_relationship" required maxlength="100"></div>
+<div class="wide"><label for="emergency_contact_phone">Emergency Contact Phone Number *</label><input id="emergency_contact_phone" name="emergency_contact_phone" required maxlength="60"></div>
+<div class="wide"><label for="medical_notes">Medical condition, allergy, or injury the coaching staff should know about</label><textarea id="medical_notes" name="medical_notes" maxlength="1500"></textarea><p class="hint">Only share information relevant to player safety. Access is restricted to authorised academy administrators.</p></div>
+</div></section>
+<section class="section"><h2>SECTION D: PLAYER COMMITMENT</h2><p>I understand that as a registered member of BINTIN FA, I am expected to attend training sessions and matches punctually; respect coaches, teammates, referees, opponents, and club officials; follow the rules and regulations of BINTIN FA; maintain discipline and good sportsmanship; take proper care of club equipment and facilities; and inform the coach when I am unable to attend training or a match.</p>
+<label class="check"><input type="checkbox" id="commitment_agreed" required><span>I have read and agree to the player commitment. *</span></label></section>
+<section class="section"><h2>SECTION E: PLAYER AND PARENT/GUARDIAN DECLARATION</h2><p>I confirm that the information provided in this form is accurate to the best of my knowledge. I agree to respect the rules and regulations of BINTIN FA.</p><div class="grid">
+<div><label for="player_declaration_name">Player's Full Name *</label><input id="player_declaration_name" name="player_declaration_name" required maxlength="150"></div>
+<div><label for="player_signature_typed">Player's Signature (typed name, optional)</label><input id="player_signature_typed" name="player_signature_typed" maxlength="150"></div>
+<div><label for="player_declaration_date">Declaration Date *</label><input id="player_declaration_date" name="player_declaration_date" type="date" required></div>
+<div><label for="guardian_declaration_name">Parent/Guardian's Name (if applicable)</label><input id="guardian_declaration_name" name="guardian_declaration_name" maxlength="150"></div>
+<div><label for="guardian_signature_typed">Parent/Guardian's Signature (typed name, optional)</label><input id="guardian_signature_typed" name="guardian_signature_typed" maxlength="150"></div>
+<div><label for="guardian_declaration_date">Parent/Guardian Declaration Date</label><input id="guardian_declaration_date" name="guardian_declaration_date" type="date"></div>
+</div><p class="hint">The printable PDF includes blank signature lines for handwritten signatures.</p></section>
+<div class="hp" aria-hidden="true"><label for="website">Leave this field blank</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+<div class="actions"><button id="submit" type="submit">Submit Registration</button><span id="status" class="status" role="status" aria-live="polite"></span></div>
+</form>
+<div id="success" class="result" hidden></div>
+</main>
+<footer>BINTIN FA — DISCIPLINE • DEVELOPMENT • TEAMWORK • EXCELLENCE</footer>
+<script>
+const form=document.getElementById('registration'), submit=document.getElementById('submit'), statusEl=document.getElementById('status'), success=document.getElementById('success');
+const today=new Date().toISOString().slice(0,10);
+document.getElementById('player_declaration_date').value=today;
+form.addEventListener('submit',async e=>{
+ e.preventDefault(); if(!form.reportValidity()) return;
+ const payload=Object.fromEntries(new FormData(form).entries());
+ payload.commitment_agreed=document.getElementById('commitment_agreed').checked;
+ submit.disabled=true; statusEl.textContent='Submitting securely and generating your registration PDF…'; success.hidden=true;
+ try{
+  const res=await fetch('/.netlify/functions/register-player',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.error||'Registration failed. Please try again.');
+  success.hidden=false;
+  success.innerHTML='<h2>Registration received</h2><p>Your registration number is <strong></strong></p><p></p>';
+  success.querySelector('strong').textContent=data.registration_number;
+  success.querySelectorAll('p')[1].textContent=data.message;
+  if(data.pdf_pending) success.querySelectorAll('p')[1].textContent='Your registration is saved, but the PDF needs a short delay. The academy can retrieve it from the admin dashboard.';
+  form.reset(); document.getElementById('player_declaration_date').value=today;
+  statusEl.textContent=''; success.scrollIntoView({behavior:'smooth',block:'center'});
+ }catch(err){statusEl.textContent=err.message||'Could not submit. Please check your connection and try again.';}
+ finally{submit.disabled=false;}
+});
+</script>
+</body></html>
