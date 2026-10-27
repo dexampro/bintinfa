@@ -1,5 +1,5 @@
 const { createClient } = require("@supabase/supabase-js");
-const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
+const { createRegistrationPdf } = require("./pdf-layout");
 const fs = require("fs");
 const path = require("path");
 
@@ -38,54 +38,7 @@ function wrap(text, font, size, maxWidth) {
   return lines.length ? lines : [""];
 }
 async function pdfFor(r) {
-  const pdf = await PDFDocument.create();
-  let page = pdf.addPage([595.28, 841.89]);
-  const { width, height } = page.getSize();
-  const regular = await pdf.embedFont(StandardFonts.Helvetica);
-  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
-  const green = rgb(0.02, 0.22, 0.12), gold = rgb(0.82, 0.48, 0.05), ink = rgb(0.12,0.16,0.14);
-  const margin = 38; let y = height - 30;
-  try {
-    const img = await pdf.embedJpg(fs.readFileSync(path.join(__dirname, "bintin-fa-logo.jpg")));
-    page.drawImage(img, { x: (width - 64)/2, y: y-64, width: 64, height: 64 }); y -= 74;
-  } catch (_) {}
-  page.drawText("BINTIN FA — NEW PLAYER REGISTRATION FORM", { x: margin, y, size: 11, font: bold, color: green }); y -= 24;
-  function section(title) {
-    if (y < 75) { page = pdf.addPage([595.28,841.89]); y = height-35; }
-    page.drawRectangle({ x: margin, y:y-14, width:width-2*margin, height:18, color:green });
-    page.drawText(title,{x:margin+6,y:y-9,size:8.5,font:bold,color:rgb(1,1,1)}); y-=24;
-  }
-  function field(label,value) {
-    const lines = wrap(`${label}: ${value || "____________________________"}`, regular, 7.3, width-2*margin-10);
-    for (const line of lines) {
-      if (y < 48) { page = pdf.addPage([595.28,841.89]); y=height-35; }
-      page.drawText(line,{x:margin+3,y,size:7.3,font:regular,color:ink}); y-=10;
-    }
-    y-=2;
-  }
-  section("SECTION A: PERSONAL INFORMATION");
-  field("Registration Number",r.registration_number); field("Full Name",r.full_name); field("Date of Birth",r.date_of_birth);
-  field("Age",r.age); field("Home Address",r.home_address); field("Phone Number",r.phone_number);
-  field("Parent/Guardian Name",r.guardian_name); field("Parent/Guardian Phone",r.guardian_phone); field("School/Occupation",r.school_occupation);
-  section("SECTION B: FOOTBALL INFORMATION");
-  field("Preferred Position",r.preferred_position); field("Secondary Position",r.secondary_position); field("Preferred Foot",r.preferred_foot);
-  field("Previous Club/Academy",r.previous_club); field("Previous Competition Experience",r.competition_experience);
-  field("Jersey Number Preference",r.jersey_number_preference); field("Date Joined Bintin FA",r.date_joined);
-  section("SECTION C: EMERGENCY AND MEDICAL INFORMATION");
-  field("Emergency Contact Name",r.emergency_contact_name); field("Relationship",r.emergency_relationship);
-  field("Emergency Contact Phone",r.emergency_contact_phone); field("Medical condition/allergy/injury",r.medical_notes || "None provided");
-  section("SECTION D: PLAYER COMMITMENT");
-  field("Commitment", "I agree to attend punctually, respect club members and officials, follow club rules, maintain sportsmanship, care for facilities, and notify the coach when absent.");
-  section("SECTION E: PLAYER AND PARENT/GUARDIAN DECLARATION");
-  field("Declaration", "I confirm that the information is accurate and agree to respect BINTIN FA rules and regulations.");
-  field("Player's Full Name",r.player_declaration_name); field("Player's Signature","____________________________"); field("Player Declaration Date",r.player_declaration_date);
-  field("Parent/Guardian Name",r.guardian_declaration_name); field("Parent/Guardian Signature","____________________________"); field("Parent/Guardian Date",r.guardian_declaration_date);
-  section("SECTION F: FOR OFFICIAL USE ONLY");
-  field("Registration Number",r.registration_number); field("Team Category",r.team_category); field("Registration Fee",r.registration_fee);
-  field("Date Registered",r.date_registered); field("Coach's Name",r.coach_name); field("Coach's Signature","____________________________");
-  if (y < 40) { page = pdf.addPage([595.28,841.89]); y=height-35; }
-  page.drawText("BINTIN FA — DISCIPLINE • DEVELOPMENT • TEAMWORK • EXCELLENCE",{x:margin,y:25,size:7,font:bold,color:green});
-  return await pdf.save();
+  return createRegistrationPdf(r, path.join(__dirname, "bintin-fa-logo.jpg"));
 }
 
 exports.handler = async event => {
