@@ -193,7 +193,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return response(405, { error: "Method not allowed." });
 
   const origin = event.headers.origin || event.headers.Origin || "";
-  const allowed = process.env.ALLOWED_ORIGIN || "";
+  const allowed = (process.env.ALLOWED_ORIGIN || "").trim().replace(/\/+$/, "");
   if (allowed && origin && origin !== allowed) return response(403, { error: "Origin not allowed." });
 
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
