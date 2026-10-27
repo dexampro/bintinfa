@@ -1,5 +1,5 @@
 const { createClient } = require("@supabase/supabase-js");
-const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
+const { createRegistrationPdf } = require("./pdf-layout");
 const fs = require("fs");
 const path = require("path");
 
@@ -43,126 +43,7 @@ function wrap(text, font, size, maxWidth) {
   return lines.length ? lines : [""];
 }
 async function makePdf(record) {
-  const pdf = await PDFDocument.create();
-  let page = pdf.addPage([595.28, 841.89]); // A4
-  const { width, height } = page.getSize();
-  const regular = await pdf.embedFont(StandardFonts.Helvetica);
-  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
-  const green = rgb(0.02, 0.22, 0.12);
-  const gold = rgb(0.82, 0.48, 0.05);
-  const ink = rgb(0.12, 0.16, 0.14);
-  const muted = rgb(0.35, 0.39, 0.36);
-  const margin = 38;
-  let y = height - 30;
-
-  // The logo is bundled with the website and embedded into each PDF.
-  try {
-    const logoPath = path.join(__dirname, "bintin-fa-logo.jpg");
-    const bytes = fs.readFileSync(logoPath);
-    const logo = await pdf.embedJpg(bytes);
-    const boxW = 76, boxH = 76;
-    page.drawImage(logo, { x: (width - boxW) / 2, y: y - boxH + 3, width: boxW, height: boxH });
-    y -= 86;
-  } catch (_) {
-    page.drawText("BINTIN FA", { x: margin, y, size: 18, font: bold, color: green });
-    y -= 24;
-  }
-
-  page.drawText("BINTIN FA", { x: margin, y, size: 16, font: bold, color: green });
-  page.drawText("NEW PLAYER REGISTRATION FORM", {
-    x: margin, y: y - 18, size: 11, font: bold, color: gold
-  });
-  page.drawText("Player Membership and Registration Record", {
-    x: margin, y: y - 32, size: 8, font: regular, color: muted
-  });
-  y -= 44;
-
-  function ensureSpace(need = 35) {
-    if (y < margin + need) {
-      page = pdf.addPage([595.28, 841.89]);
-      y = height - 35;
-    }
-  }
-  function section(title) {
-    ensureSpace(34);
-    page.drawRectangle({ x: margin, y: y - 15, width: width - margin * 2, height: 19, color: green });
-    page.drawText(title, { x: margin + 7, y: y - 10, size: 9, font: bold, color: rgb(1,1,1) });
-    y -= 26;
-  }
-  function field(label, value, opts = {}) {
-    const size = opts.size || 7.7;
-    const lines = wrap(`${label}: ${value || " "}`, regular, size, width - margin * 2 - 10);
-    ensureSpace(lines.length * 11 + 6);
-    for (const line of lines) {
-      page.drawText(line, { x: margin + 3, y, size, font: regular, color: ink });
-      y -= 10;
-    }
-    y -= 2;
-  }
-  function paragraph(text) {
-    for (const line of wrap(text, regular, 7.4, width - margin * 2 - 10)) {
-      ensureSpace(12);
-      page.drawText(line, { x: margin + 3, y, size: 7.4, font: regular, color: ink });
-      y -= 10;
-    }
-    y -= 3;
-  }
-
-  section("SECTION A: PERSONAL INFORMATION");
-  field("Registration Number", record.registration_number);
-  field("Full Name", record.full_name);
-  field("Date of Birth", record.date_of_birth);
-  field("Age", record.age);
-  field("Home Address", record.home_address);
-  field("Phone Number", record.phone_number);
-  field("Parent/Guardian Name (for players under 18)", record.guardian_name);
-  field("Parent/Guardian Phone Number", record.guardian_phone);
-  field("School/Occupation", record.school_occupation);
-
-  section("SECTION B: FOOTBALL INFORMATION");
-  field("Preferred Playing Position", record.preferred_position);
-  field("Secondary Position", record.secondary_position);
-  field("Preferred Foot", record.preferred_foot);
-  field("Previous Club/Academy", record.previous_club);
-  field("Previous Competition Experience", record.competition_experience);
-  field("Jersey Number Preference", record.jersey_number_preference);
-  field("Date Joined Bintin FA", record.date_joined);
-
-  section("SECTION C: EMERGENCY AND MEDICAL INFORMATION");
-  field("Emergency Contact Name", record.emergency_contact_name);
-  field("Relationship to Player", record.emergency_relationship);
-  field("Emergency Contact Phone Number", record.emergency_contact_phone);
-  field("Medical condition, allergy, or injury coaches should know about", record.medical_notes || "None provided");
-
-  section("SECTION D: PLAYER COMMITMENT");
-  paragraph("I understand that as a registered member of Bintin FA, I am expected to attend training sessions and matches punctually; respect coaches, teammates, referees, opponents and club officials; follow the rules and regulations of Bintin FA; maintain discipline and good sportsmanship; take proper care of club equipment and facilities; and inform the coach when I am unable to attend training or a match.");
-  field("Commitment Agreement", record.commitment_agreed ? "Agreed" : "Not recorded");
-
-  section("SECTION E: PLAYER AND PARENT/GUARDIAN DECLARATION");
-  paragraph("I confirm that the information provided in this form is accurate to the best of my knowledge. I agree to respect the rules and regulations of Bintin FA.");
-  field("Player's Full Name", record.player_declaration_name);
-  field("Player's Signature", "____________________________________________");
-  field("Player Declaration Date", record.player_declaration_date);
-  field("Parent/Guardian Name (if applicable)", record.guardian_declaration_name);
-  field("Parent/Guardian Signature", "_________________________________________");
-  field("Parent/Guardian Declaration Date", record.guardian_declaration_date);
-
-  section("SECTION F: FOR OFFICIAL USE ONLY");
-  field("Registration Number", record.registration_number);
-  field("Team Category", record.team_category || "____________________________");
-  field("Registration Fee (if applicable)", record.registration_fee || "____________________________");
-  field("Date Registered", record.date_registered);
-  field("Coach's Name", record.coach_name || "____________________________");
-  field("Coach's Signature", "____________________________________________");
-
-  ensureSpace(35);
-  page.drawText("BINTIN FA — DISCIPLINE • DEVELOPMENT • TEAMWORK • EXCELLENCE", {
-    x: margin, y: margin + 10, size: 7.2, font: bold, color: green
-  });
-  page.drawText("Keep this record secure. Medical information is confidential.", {
-    x: margin, y: margin, size: 6.5, font: regular, color: muted
-  });
-  return await pdf.save();
+  return createRegistrationPdf(record, path.join(__dirname, "bintin-fa-logo.jpg"));
 }
 
 async function notify(record, siteUrl) {
